@@ -7,7 +7,7 @@ from tqdm import tqdm
 import os
 import argparse
 
-def train(device, model, loader, criterion, num_epochs, save_path):
+def train(device, model, loader, criterion, num_epochs, save_path, save_period):
     optimizer = Adam(model.parameters(), lr=0.01)
     
     # train
@@ -31,7 +31,7 @@ def train(device, model, loader, criterion, num_epochs, save_path):
             loop.set_postfix(loss=loss.data.item())
 
     # Save model
-        if epoch % 10 == 0:
+        if epoch % save_period == 0:
             torch.save({
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
@@ -71,6 +71,7 @@ def parse_opt():
     parser.add_argument("--path", type=str, default= os.getcwd()+"/dataset", help="Dataset path")
     parser.add_argument("--batch_size", type=int, default=64, help="Data batch-size")
     parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs")
+    parser.add_argument("--save_period", type=int, default=-1, help="Save every n_th epoch")
     parser.add_argument("--save_path", type=str, default= os.getcwd() + "/saved_model", help="Save model path")
     args = parser.parse_args()
     
@@ -84,5 +85,5 @@ if __name__ == "__main__":
 
     data_loader = loader.data_loader(args.path, args.batch_size)
     model, device = main()
-    CNN, crit = train(device, model, data_loader['train'], criterion, args.num_epochs)
+    CNN, crit = train(device, model, data_loader['train'], criterion, args.num_epochs, args.save_path, args.save_period)
     test(device, CNN, data_loader['test'], criterion)

@@ -19,7 +19,8 @@ def load_model(model_path):
     
     return model
 
-def Inference(device, model, img_path):     
+def Inference(device, model, img_path, out_path):
+    count = 0     
     # Load image
     data_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
@@ -28,6 +29,7 @@ def Inference(device, model, img_path):
     ])
 
     for img_f in os.listdir(img_path):
+        ext = img_f.split(".")[1]
         image_path = os.path.join(img_path, img_f)    
         img_array = Image.open(image_path).convert("RGB")
         # img_ls.append(img_array)
@@ -44,9 +46,10 @@ def Inference(device, model, img_path):
             image = cv2.imread(image_path)
             # print(f"Class: {pred}")
             if (pred[0] == 1): 
-                cv2.imshow("Predicted: Dog", image)
+                cv2.imwrite(f"{out_path}/Dog{count}.{ext}", image)
             else: 
-                cv2.imshow("Predicted: Cat", image)
+                cv2.imwrite(f"{out_path}/Cat{count}.{ext}", image)
+            count += 1
             
             cv2.waitKey()
             cv2.destroyAllWindows()
@@ -55,6 +58,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
     parser.add_argument("--img_path", type=str, default=os.getcwd()+"/infer_images", help="Image folder path")
+    parser.add_argument("--out_path", type=str, default=os.getcwd(), help="Predicted Image path")
     args = parser.parse_args()
     
     return args
@@ -64,4 +68,4 @@ if __name__ == "__main__":
     print(f"Using {device}")
     args = parse_opt()
     model = load_model(args.model_path)
-    Inference(device, model, args.img_path)
+    Inference(device, model, args.img_path, args.out_path)
