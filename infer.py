@@ -1,3 +1,4 @@
+from eval import load_model
 import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
@@ -7,18 +8,6 @@ from PIL import Image
 import cv2
 import argparse
 import os
-
-def load_model(model_path):
-    # Load checkpoint
-    model = torchvision.models.resnet50(pretrained=False)
-    model.fc = torch.nn.Linear(2048, 2, bias=True)
-    print("----> Loading checkpoint")
-    checkpoint = torch.load(model_path, map_location=torch.device("cpu")) # Try to load last checkpoint
-    model.load_state_dict(checkpoint["model_state_dict"])
-    print("Model loaded")
-    model.to(device)
-    
-    return model
 
 def Inference(device, model, img_path, out_path):
     count = 0   
@@ -72,5 +61,5 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using {device}")
     args = parse_opt()
-    model = load_model(args.model_path)
+    model = load_model(device, args.model_path)
     Inference(device, model, args.img_path, args.out_path)
