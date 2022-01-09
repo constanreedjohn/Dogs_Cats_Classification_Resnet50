@@ -13,12 +13,12 @@
 ### Put dataset in the following structure:
 > ./dataset
 >> ./train
->>> ./img_1.jpg
->>> ./img_2.jpg
+* ./img_1.jpg
+* ./img_2.jpg
 
 >> ./test
->>> ./img_1.jpg
->>> ./img_2.jpg
+* ./img_1.jpg
+* ./img_2.jpg
 
 ## TRAIN:
 ### Run train.py
