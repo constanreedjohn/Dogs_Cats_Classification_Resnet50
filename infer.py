@@ -16,11 +16,16 @@ def load_model(model_path):
     checkpoint = torch.load(model_path, map_location=torch.device("cpu")) # Try to load last checkpoint
     model.load_state_dict(checkpoint["model_state_dict"])
     print("Model loaded")
+    model.to(device)
     
     return model
 
 def Inference(device, model, img_path, out_path):
-    count = 0     
+    count = 0   
+
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
+
     # Load image
     data_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
@@ -58,7 +63,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
     parser.add_argument("--img_path", type=str, default=os.getcwd()+"/infer_images", help="Image folder path")
-    parser.add_argument("--out_path", type=str, default=os.getcwd(), help="Predicted Image path")
+    parser.add_argument("--out_path", type=str, default=os.getcwd(), help="Predicted Image folder path")
     args = parser.parse_args()
     
     return args
