@@ -12,13 +12,12 @@
 ## Transfer learning:
 ### Put dataset in the following structure:
 * | ./dataset
-* |- ./train
-* |-- ./img_1.jpg
-* |-- ./img_2.jpg
-
->> ./test
-* ./img_1.jpg
-* ./img_2.jpg
+* |== ./train
+* |==== ./img_1.jpg
+* |==== ./img_2.jpg
+* |== ./test
+* |====./img_1.jpg
+* |====./img_2.jpg
 
 ## TRAIN:
 ### Run train.py
