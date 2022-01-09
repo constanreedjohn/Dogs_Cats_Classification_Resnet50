@@ -26,6 +26,8 @@
 
 ## EVALUATION:
 ### Run eval.py
+* python eval.py --help --> To see arguments
+* python eval.py --model_path ./pretrained.pt --path ./dataset --batch_size 64
 
 ## INFERENCE:
 ### Run infer.py
