@@ -2,7 +2,6 @@ from eval import load_model
 import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
-import torchvision
 from torch.utils.data import DataLoader
 from PIL import Image
 import cv2
@@ -52,7 +51,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
     parser.add_argument("--img_path", type=str, default=os.getcwd()+"/infer_images", help="Image folder path")
-    parser.add_argument("--out_path", type=str, default=os.getcwd(), help="Predicted Image folder path")
+    parser.add_argument("--out_path", type=str, default=os.getcwd()+"/output", help="Predicted Image folder path")
     args = parser.parse_args()
     
     return args

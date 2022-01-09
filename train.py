@@ -31,7 +31,7 @@ def train(device, model, loader, criterion, num_epochs, save_path, save_period):
             loop.set_postfix(loss=loss.data.item())
 
     # Save model
-        if epoch % save_period == 0:
+        if (save_period > -1) and (epoch % save_period == 0):
             torch.save({
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
@@ -40,28 +40,12 @@ def train(device, model, loader, criterion, num_epochs, save_path, save_period):
 
     return model, criterion
 
-def test(device, model, loader, criterion):
-    model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for x, y in loader:
-            x = x.to(device)
-            y = y.to(device)
-            output = model(x)
-            _, pred = torch.max(output, 1)
-            correct += (pred == y).sum().item()
-            test_loss = criterion(output, y)    
-
-    test_loss /= len(loader.dataset)
-    print(f"Average loss: {test_loss}   Accuracy: {correct} / {len(loader.dataset)}  {int(correct) / len(loader.dataset) * 100}%")
-
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using {device}")
     model = torchvision.models.resnet50(pretrained=True)
     model.fc = nn.Linear(2048, 2, bias=True)
-    print("Model conifgured: ", model.fc)
+    print("Model configured: ", model.fc)
     model.to(device)
 
     return model, device
@@ -86,4 +70,3 @@ if __name__ == "__main__":
     data_loader = loader.data_loader(args.path, args.batch_size)
     model, device = main()
     CNN, crit = train(device, model, data_loader['train'], criterion, args.num_epochs, args.save_path, args.save_period)
-    test(device, CNN, data_loader['test'], criterion)
