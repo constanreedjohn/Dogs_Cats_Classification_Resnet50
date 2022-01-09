@@ -11,7 +11,7 @@ def train(device, model, loader, criterion, num_epochs, save_path, save_period):
     optimizer = Adam(model.parameters(), lr=0.01)
     
     # train
-    for epoch in range(0, num_epochs):
+    for epoch in range(num_epochs):
         losses = []
         model.train()
         loop = tqdm(enumerate(loader), total=len(loader))
@@ -31,7 +31,7 @@ def train(device, model, loader, criterion, num_epochs, save_path, save_period):
             loop.set_postfix(loss=loss.data.item())
 
     # Save model
-        if (save_period > -1) and (epoch+1 % save_period == 0):
+        if (save_period != -1) and ((epoch+1) % save_period == 0):
             torch.save({
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
