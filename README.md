@@ -11,13 +11,13 @@
 
 ## Transfer learning:
 ### Put dataset in the following structure:
-> ./dataset
->> ./train
->>> ./img_1.jpg
->>> ./img_2.jpg
->> ./test
->>> ./img_1.jpg
->>> ./img_2.jpg
+* | ./dataset
+* |== ./train
+* |==== ./img_1.jpg
+* |==== ./img_2.jpg
+* |== ./test
+* |====./img_1.jpg
+* |====./img_2.jpg
 
 ## TRAIN:
 ### Run train.py
@@ -26,6 +26,8 @@
 
 ## EVALUATION:
 ### Run eval.py
+* python eval.py --help --> To see arguments
+* python eval.py --model_path ./pretrained.pt --path ./dataset --batch_size 64
 
 ## INFERENCE:
 ### Run infer.py
