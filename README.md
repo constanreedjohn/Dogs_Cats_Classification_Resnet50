@@ -15,6 +15,7 @@
 >> ./train
 >>> ./img_1.jpg
 >>> ./img_2.jpg
+
 >> ./test
 >>> ./img_1.jpg
 >>> ./img_2.jpg
