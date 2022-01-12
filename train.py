@@ -67,7 +67,7 @@ def train(device, model, loader, criterion, optimizer, num_epochs, save_path, sa
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'epochs': epoch,
-            }, f"{save_path}/Checkpoint_epoch_{str(epoch)}.pt")
+            }, f"{save_path}/Checkpoint_epoch_{str(epoch)}.pth")
 
     end = time.time()
     elapse = end - start
