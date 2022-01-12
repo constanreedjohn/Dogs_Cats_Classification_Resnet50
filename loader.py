@@ -9,13 +9,18 @@ def data_loader(path, batch_size):
                                                 transforms.ToTensor(),
                                                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                             ]),
+                  'valid': transforms.Compose([
+                                                transforms.Resize((256, 256)),
+                                                transforms.ToTensor(),
+                                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                            ]),
                   'test': transforms.Compose([
                                                 transforms.Resize((256, 256)),
                                                 transforms.ToTensor(),
                                                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                             ])
                  }
-    dataset = {x: ImageFolder(os.path.join(path, x), preprocess[x]) for x in ['train', 'test']}
-    loader = {x: DataLoader(dataset[x], batch_size=batch_size, shuffle=True) for x in ['train', 'test']}
+    dataset = {x: ImageFolder(os.path.join(path, x), preprocess[x]) for x in ['train', 'valid' 'test']}
+    loader = {x: DataLoader(dataset[x], batch_size=batch_size, shuffle=True) for x in ['train', 'valid', 'test']}
 
     return loader
