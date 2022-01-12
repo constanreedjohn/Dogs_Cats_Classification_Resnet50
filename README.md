@@ -15,9 +15,12 @@
 * |== ./train
 * |==== ./img_1.jpg
 * |==== ./img_2.jpg
+* |== ./val
+* |==== ./img_1.jpg
+* |==== ./img_2.jpg
 * |== ./test
-* |====./img_1.jpg
-* |====./img_2.jpg
+* |==== ./img_1.jpg
+* |==== ./img_2.jpg
 
 ## TRAIN:
 ### Run train.py
@@ -33,7 +36,3 @@
 ### Run infer.py
 * python infer.py --help --> To see arguments
 * python infer.py --model_path ./pretrained.pt --img_path ./infer_images --output_path ./output
-
-# NOTE:
-* This project data loader is applied for only train and test set.
-* If you want to include valid set, see loader.py.
