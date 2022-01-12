@@ -22,14 +22,14 @@ def Inference(device, model, img_path, out_path):
     ])
 
     for img_f in os.listdir(img_path):
-        ext = img_f.split(".")[1]
+        ext = img_f.split(".")[-1]
         image_path = os.path.join(img_path, img_f)    
         img_array = Image.open(image_path).convert("RGB")
         # img_ls.append(img_array)
     
         temp = data_transforms(img_array).unsqueeze(dim=0)
         load = DataLoader(temp)
-
+        
         for x in load:
             x = x.to(device)
             output = model(x)

@@ -28,7 +28,7 @@ def test(device, model, loader, criterion):
             output = model(x)
             _, pred = torch.max(output, 1)
             correct += (pred == y).sum().item()
-            test_loss = criterion(output, y)    
+            test_loss += criterion(output, y)    
 
     test_loss /= len(loader.dataset)
     print(f"Average loss: {test_loss}   Accuracy: {correct} / {len(loader.dataset)}  {int(correct) / len(loader.dataset) * 100}%")
