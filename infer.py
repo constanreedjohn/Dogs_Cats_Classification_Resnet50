@@ -20,7 +20,7 @@ def Inference(device, model, img_path, out_path):
         transforms.ToTensor(),
         transforms.Normalize([0.5]*3, [0.5]*3)
     ])
-
+    model.eval()
     for img_f in os.listdir(img_path):
         ext = img_f.split(".")[-1]
         image_path = os.path.join(img_path, img_f)    
@@ -37,16 +37,17 @@ def Inference(device, model, img_path, out_path):
 
             # Show image
             image = cv2.imread(image_path)
-            # print(f"Class: {pred}")
+            print(image_path)
+            print(f"Proba: {_}  Class: {pred}")
             if (pred[0] == 1): 
-                cv2.imwrite(f"{out_path}/Dog{count}.{ext}", image)
+                print("Predicted =====> Positive")
+                cv2.imwrite(f"{out_path}/Pos{count}.{ext}", image)
             else: 
-                cv2.imwrite(f"{out_path}/Cat{count}.{ext}", image)
+                print("Predicted =====> Negative")
+                cv2.imwrite(f"{out_path}/Neg{count}.{ext}", image)
             count += 1
+            print()
             
-            cv2.waitKey()
-            cv2.destroyAllWindows()
-
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
