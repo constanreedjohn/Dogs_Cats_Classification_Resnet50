@@ -11,16 +11,16 @@ import os
 def Inference(device, model, img_path, out_path):
     count = 0   
 
-    if not os.path.exists(out_path):
-        os.mkdir(out_path)
-
     # Load image
     data_transforms = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.ToTensor(),
         transforms.Normalize([0.5]*3, [0.5]*3)
     ])
+    
     model.eval()
+    print(f"Found {len(os.listdir(img_path))} images")
+
     for img_f in os.listdir(img_path):
         ext = img_f.split(".")[-1]
         image_path = os.path.join(img_path, img_f)    
@@ -38,7 +38,7 @@ def Inference(device, model, img_path, out_path):
             # Show image
             image = cv2.imread(image_path)
             print(image_path)
-            print(f"Proba: {_}  Class: {pred}")
+            print(f"Class: {pred}")
             if (pred[0] == 1): 
                 print("Predicted =====> Positive")
                 cv2.imwrite(f"{out_path}/Pos{count}.{ext}", image)
@@ -62,4 +62,10 @@ if __name__ == "__main__":
     print(f"Using {device}")
     args = parse_opt()
     model = load_model(device, args.model_path)
+    
+    if not os.path.exists(args.out_path):
+        os.mkdir(args.out_path)
+
     Inference(device, model, args.img_path, args.out_path)
+
+    print(f"Predicted images are saved in: {args.out_path}")

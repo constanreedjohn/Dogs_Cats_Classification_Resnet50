@@ -52,4 +52,7 @@ if __name__ == "__main__":
 
     data_loader = loader.data_loader(args.path, args.batch_size)
     model = load_model(device, args.model_path)
+    print(f"---------------------------")
+    print(f"Found {len(data_loader['test'].dataset)} for evaluation")
+    print(f"---------------------------")
     test(device, model, data_loader['test'], criterion)
