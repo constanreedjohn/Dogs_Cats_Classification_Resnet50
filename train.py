@@ -11,7 +11,7 @@ import time
 def train(device, model, loader, criterion, optimizer, num_epochs, save_path, save_period):
     train = {'loss': [], 'acc': []}
     val = {'loss': [], 'acc': []}
-    
+    best_acc = 0.0
     start = time.time()
     # train
     for epoch in range(num_epochs):
@@ -55,19 +55,38 @@ def train(device, model, loader, criterion, optimizer, num_epochs, save_path, sa
             elif phase == 'valid':
                 val['loss'].append(running_loss / len(loader[phase].dataset))
                 val['acc'].append(running_acc.double() / len(loader[phase].dataset))
+                curr_acc = running_acc.double() / len(loader[phase].dataset)
             
             # Result per epoch
             epoch_loss = running_loss / len(loader[phase].dataset)
             epoch_acc = running_acc.double() / len(loader[phase].dataset)
             print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
 
+    # Save best model
+            if curr_acc > best_acc:
+                best_acc = curr_acc
+                torch.save({
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'epochs': epoch,
+                        'loss': criterion
+                        }, f"{save_path}/Checkpoint_best.pth")   
     # Save model
         if (save_period != -1) and ((epoch+1) % save_period == 0):
             torch.save({
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'epochs': epoch,
-            }, f"{save_path}/Checkpoint_epoch_{str(epoch)}.pth")
+                        'loss': criterion
+            }, f"{save_path}/Checkpoint_epoch_{str(epoch+1)}.pth")
+    # Save last
+        if (epoch+1 == num_epochs):
+            torch.save({
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'epochs': epoch,
+                        'loss': criterion
+            }, f"{save_path}/Checkpoint_last.pth")
 
     end = time.time()
     elapse = end - start
