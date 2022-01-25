@@ -2,13 +2,13 @@ import loader
 import torch
 import torchvision
 import torch.nn as nn
-from torch.optim import Adam
+from torch.optim import Adam, ReduceLROnPlateau
 from tqdm import tqdm
 import os
 import argparse
 import time
 
-def train(device, model, loader, criterion, optimizer, num_epochs, save_path, save_period):
+def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, save_path, save_period):
     train = {'loss': [], 'acc': []}
     val = {'loss': [], 'acc': []}
     best_acc = 0.0
@@ -56,6 +56,7 @@ def train(device, model, loader, criterion, optimizer, num_epochs, save_path, sa
                 val['loss'].append(running_loss / len(loader[phase].dataset))
                 val['acc'].append(running_acc.double() / len(loader[phase].dataset))
                 curr_acc = running_acc.double() / len(loader[phase].dataset)
+                scheduler.step(curr_acc)
             
             # Result per epoch
             epoch_loss = running_loss / len(loader[phase].dataset)
@@ -100,11 +101,12 @@ def main():
     print(f"Using {device}")
     model = torchvision.models.resnet50(pretrained=True)
     optimizer = Adam(model.parameters(), lr=0.001)
+    scheduler = ReduceLROnPlateau(optimizer, 'max')
     model.fc = nn.Linear(2048, 2, bias=True)
     print("Model configured: ", model.fc)
     model.to(device)
 
-    return device, model, optimizer
+    return device, model, optimizer, scheduler
 
 def parse_opt():
     parser = argparse.ArgumentParser()
@@ -124,7 +126,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
 
     data_loader = loader.data_loader(args.path, args.batch_size)
-    device, model, optimizer = main()
+    device, model, optimizer, scheduler = main()
     print(f"----------DATASET----------")
     print(f"Found {len(data_loader['train'].dataset)} for train")
     print(f"Found {len(data_loader['valid'].dataset)} for validation")
@@ -137,4 +139,4 @@ if __name__ == "__main__":
     print(f"Model is saved in: {args.save_path}")
     print(f"---------------------------")
     print(model)
-    # CNN = train(device, model, data_loader, criterion, optimizer, args.num_epochs, args.save_path, args.save_period)
+    CNN = train(device, model, data_loader, criterion, optimizer, scheduler, args.num_epochs, args.save_path, args.save_period)
