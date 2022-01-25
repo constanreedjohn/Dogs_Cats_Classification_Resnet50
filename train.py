@@ -2,7 +2,8 @@ import loader
 import torch
 import torchvision
 import torch.nn as nn
-from torch.optim import Adam, ReduceLROnPlateau
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 import os
 import argparse
