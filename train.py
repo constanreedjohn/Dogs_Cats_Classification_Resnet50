@@ -1,4 +1,6 @@
 import loader
+import matplotlib.pyplot as plt
+import cv2
 import torch
 import torchvision
 import torch.nn as nn
@@ -9,7 +11,16 @@ import os
 import argparse
 import time
 
-def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, save_path, save_period):
+def train(device, 
+          model, 
+          loader, 
+          criterion, 
+          optimizer, 
+          scheduler, 
+          num_epochs,
+          name, 
+          save_path, 
+          save_period):
     train = {'loss': [], 'acc': []}
     val = {'loss': [], 'acc': []}
     best_acc = 0.0
@@ -73,7 +84,7 @@ def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, sa
                         'optimizer_state_dict': optimizer.state_dict(),
                         'epochs': epoch,
                         'loss': criterion
-                        }, f"{save_path}/Checkpoint_best.pth")   
+                        }, f"{save_path}/{name}/Checkpoint_best.pth")   
     # Save model
         if (save_period != -1) and ((epoch+1) % save_period == 0):
             torch.save({
@@ -81,7 +92,7 @@ def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, sa
                         'optimizer_state_dict': optimizer.state_dict(),
                         'epochs': epoch,
                         'loss': criterion
-            }, f"{save_path}/Checkpoint_epoch_{str(epoch+1)}.pth")
+            }, f"{save_path}/{name}/Checkpoint_epoch_{str(epoch+1)}.pth")
     # Save last
         if (epoch+1 == num_epochs):
             torch.save({
@@ -89,14 +100,35 @@ def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, sa
                         'optimizer_state_dict': optimizer.state_dict(),
                         'epochs': epoch,
                         'loss': criterion
-            }, f"{save_path}/Checkpoint_last.pth")
+            }, f"{save_path}/{name}/Checkpoint_last.pth")
 
     end = time.time()
     elapse = end - start
     print(f"Training complete in {(elapse // 60):.0f}m {(elapse % 60):.2f}s")
     print()
 
-    return model
+    return model, train, val
+
+def plot_result(train, val, num_epochs, name, save_path):
+    saved_path = os.path.join(save_path, name)
+    fig, ax = plt.subplots(1, 2)
+    fig.set_size_inches((16,8))
+
+    ax[0].set_title("Evaluation Loss")
+    ax[0].plot(train['loss'], label="Train")
+    ax[0].plot(val['loss'], label="Valid")
+    ax[0].set_xlabel("Epoch")
+    ax[0].set_xticks([i for i in range(num_epochs)])
+    ax[0].set_ylabel("Loss")
+
+    ax[1].set_title("Evaluation Accuracy")
+    ax[1].plot(train['acc'], label="Train")
+    ax[1].plot(val['acc'], label="Valid")
+    ax[1].set_xlabel("Epoch")
+    ax[1].set_xticks([i for i in range(num_epochs)])
+    ax[1].set_ylabel("Accuracy")
+
+    plt.savefig(f"{saved_path}/Evaluation.png")
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -116,6 +148,7 @@ def parse_opt():
     parser.add_argument("--batch_size", type=int, default=64, help="Data batch-size")
     parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs")
     parser.add_argument("--save_period", type=int, default=-1, help="Save every n_th epoch")
+    parser.add_argument("--name", type=str, help="Name of model")
     parser.add_argument("--save_path", type=str, default= os.getcwd() + "/saved_model", help="Save model path")
     args = parser.parse_args()
     
@@ -141,4 +174,15 @@ if __name__ == "__main__":
     print(f"Model is saved in: {args.save_path}")
     print(f"---------------------------")
     print(model)
-    CNN = train(device, model, data_loader, criterion, optimizer, scheduler, args.num_epochs, args.save_path, args.save_period)
+    CNN, train, val = train(device, 
+                model, 
+                data_loader, 
+                criterion, 
+                optimizer, 
+                scheduler, 
+                args.num_epochs,
+                args.name, 
+                args.save_path, 
+                args.save_period
+            )
+    plot_result(train, val, args.num_epochs, args.name, args.save_path)
