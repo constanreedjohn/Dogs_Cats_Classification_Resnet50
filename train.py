@@ -13,6 +13,7 @@ def train(device, model, loader, criterion, optimizer, scheduler, num_epochs, sa
     train = {'loss': [], 'acc': []}
     val = {'loss': [], 'acc': []}
     best_acc = 0.0
+    curr_acc = 0.0
     start = time.time()
     # train
     for epoch in range(num_epochs):
