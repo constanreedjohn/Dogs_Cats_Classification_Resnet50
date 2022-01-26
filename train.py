@@ -157,6 +157,9 @@ def parse_opt():
 if __name__ == "__main__":
     args = parse_opt()
 
+    if not os.path.exists(os.path.join(args.save_path, args.name)):
+        os.mkdir(os.path.join(args.save_path, args.name))
+
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
 
@@ -171,7 +174,7 @@ if __name__ == "__main__":
     print(f"Model: ResNet50")
     print(f"Epoch: {args.num_epochs}    Batch_size: {args.batch_size}")
     print(f"Save period: {args.save_period}")
-    print(f"Model is saved in: {args.save_path}")
+    print(f"Model is saved in: {os.path.join(args.save_path, args.name)}")
     print(f"---------------------------")
     print(model)
     CNN, train, val = train(device, 
