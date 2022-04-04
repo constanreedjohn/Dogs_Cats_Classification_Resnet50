@@ -11,6 +11,9 @@ import os
 def Inference(device, model, img_path, out_path):
     count = 0   
 
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
+
     # Load image
     data_transforms = transforms.Compose([
         transforms.Resize((256, 256)),

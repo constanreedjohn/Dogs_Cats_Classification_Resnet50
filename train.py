@@ -18,16 +18,17 @@ def train(device,
           optimizer, 
           scheduler, 
           num_epochs,
+          start_epoch,
           name, 
           save_path, 
           save_period):
     train = {'loss': [], 'acc': []}
     val = {'loss': [], 'acc': []}
-    best_acc = 0.0
-    curr_acc = 0.0
+    best_loss = float('inf')
+    curr_loss = 0.0
     start = time.time()
     # train
-    for epoch in range(num_epochs):
+    for epoch in range(start_epoch, num_epochs):
         print(f"Epoch: {epoch+1}/{num_epochs}")
         for phase in ['train', 'valid']:
             loop = tqdm(enumerate(loader[phase]), total=len(loader[phase]))
@@ -68,8 +69,8 @@ def train(device,
             elif phase == 'valid':
                 val['loss'].append(running_loss / len(loader[phase].dataset))
                 val['acc'].append(running_acc.double() / len(loader[phase].dataset))
-                curr_acc = running_acc.double() / len(loader[phase].dataset)
-                scheduler.step(curr_acc)
+                curr_loss = running_loss / len(loader[phase].dataset)
+                scheduler.step(curr_loss)
             
             # Result per epoch
             epoch_loss = running_loss / len(loader[phase].dataset)
@@ -77,30 +78,29 @@ def train(device,
             print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
 
     # Save best model
-            if curr_acc > best_acc:
-                best_acc = curr_acc
+            if curr_loss < best_loss:
+                best_loss = curr_loss
                 torch.save({
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
+                        'model': model.state_dict(),
+                        'optimizer': optimizer.state_dict(),
                         'epochs': epoch,
                         'loss': criterion
                         }, f"{save_path}/{name}/Checkpoint_best.pth")   
     # Save model
         if (save_period != -1) and ((epoch+1) % save_period == 0):
             torch.save({
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
+                        'model': model.state_dict(),
+                        'optimizer': optimizer.state_dict(),
                         'epochs': epoch,
                         'loss': criterion
             }, f"{save_path}/{name}/Checkpoint_epoch_{str(epoch+1)}.pth")
-    # Save last
-        if (epoch+1 == num_epochs):
-            torch.save({
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
-                        'epochs': epoch,
-                        'loss': criterion
-            }, f"{save_path}/{name}/Checkpoint_last.pth")
+    # Save lastest
+        torch.save({
+                    'model': model.state_dict(),
+                    'optimizer': optimizer.state_dict(),
+                    'epochs': epoch,
+                    'loss': criterion
+        }, f"{save_path}/{name}/Checkpoint_last.pth")
 
     end = time.time()
     elapse = end - start
@@ -135,7 +135,7 @@ def main():
     print(f"Using {device}")
     model = torchvision.models.resnet50(pretrained=True)
     optimizer = Adam(model.parameters(), lr=0.001)
-    scheduler = ReduceLROnPlateau(optimizer, 'max')
+    scheduler = ReduceLROnPlateau(optimizer, 'min')
     model.fc = nn.Linear(2048, 2, bias=True)
     print("Model configured: ", model.fc)
     model.to(device)
@@ -150,6 +150,7 @@ def parse_opt():
     parser.add_argument("--save_period", type=int, default=-1, help="Save every n_th epoch")
     parser.add_argument("--name", type=str, help="Name of model")
     parser.add_argument("--save_path", type=str, default= os.getcwd() + "/saved_model", help="Save model path")
+    parser.add_argument("--resume", type=str, defalut=None, help="Resume model path")
     args = parser.parse_args()
     
     return args
@@ -177,15 +178,34 @@ if __name__ == "__main__":
     print(f"Model is saved in: {os.path.join(args.save_path, args.name)}")
     print(f"---------------------------")
     print(model)
-    CNN, train, val = train(device, 
-                model, 
-                data_loader, 
-                criterion, 
-                optimizer, 
-                scheduler, 
-                args.num_epochs,
-                args.name, 
-                args.save_path, 
-                args.save_period
-            )
+    if args.resume is None:
+        CNN, train, val = train(device, 
+                    model, 
+                    data_loader, 
+                    criterion, 
+                    optimizer, 
+                    scheduler, 
+                    args.num_epochs,
+                    0,
+                    args.name, 
+                    args.save_path, 
+                    args.save_period
+                )
+    else:
+        ckpt = torch.load(args.resume)
+        model.load_state_dict(ckpt['model'])
+        optimizer.load_state_dict(ckpt['optimizer'])
+        start_epoch = ckpt['epochs'] + 1
+        CNN, train, val = train(device, 
+                    model, 
+                    data_loader, 
+                    criterion, 
+                    optimizer, 
+                    scheduler, 
+                    args.num_epochs,
+                    start_epoch,
+                    args.name, 
+                    args.save_path, 
+                    args.save_period
+                )
     plot_result(train, val, args.num_epochs, args.name, args.save_path)
