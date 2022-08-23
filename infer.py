@@ -1,4 +1,4 @@
-from eval import load_model
+from test import load_model
 import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
@@ -56,6 +56,7 @@ def parse_opt():
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
     parser.add_argument("--img_path", type=str, default=os.getcwd()+"/infer_images", help="Image folder path")
     parser.add_argument("--out_path", type=str, default=os.getcwd()+"/output", help="Predicted Image folder path")
+    parser.add_argument("--use_torch", action="store_true", default=None, help="Use torch model")
     args = parser.parse_args()
     
     return args
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using {device}")
     args = parse_opt()
-    model = load_model(device, args.model_path)
+    model = load_model(args, device, args.model_path)
     
     if not os.path.exists(args.out_path):
         os.mkdir(args.out_path)

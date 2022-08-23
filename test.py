@@ -4,14 +4,18 @@ import torchvision
 import torch.nn as nn
 import os
 import argparse
+from model import resnet
 
-def load_model(device, model_path):
+def load_model(args, device, model_path):
     # Load checkpoint
-    model = torchvision.models.resnet50(pretrained=False)
-    model.fc = torch.nn.Linear(2048, 2, bias=True)
+    if args.use_torch:
+        model = torchvision.models.resnet50(pretrained=False)
+        model.fc = torch.nn.Linear(2048, 2, bias=True)
+    elif args.use_torch is None:
+        model = resnet.resnet50(2)
     print("----> Loading checkpoint")
     checkpoint = torch.load(model_path, map_location=device) # Try to load last checkpoint
-    model.load_state_dict(checkpoint["model_state_dict"])
+    model.load_state_dict(checkpoint["model"])
     print("Model loaded")
     model.to(device)
     
@@ -38,6 +42,7 @@ def parse_opt():
     parser.add_argument("--model_path", type=str, default= os.getcwd()+"/saved_model/pretrained.pt", help="Trained model path")
     parser.add_argument("--path", type=str, default= os.getcwd()+"/dataset", help="Dataset path")
     parser.add_argument("--batch_size", type=int, default=64, help="Data batch-size")
+    parser.add_argument("--use_torch", action="store_true", default=None, help="Use torch model")
     args = parser.parse_args()
     
     return args
@@ -51,7 +56,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
 
     data_loader = loader.data_loader(args.path, args.batch_size)
-    model = load_model(device, args.model_path)
+    model = load_model(args, device, args.model_path)
     print(f"---------------------------")
     print(f"Found {len(data_loader['test'].dataset)} for evaluation")
     print(f"---------------------------")

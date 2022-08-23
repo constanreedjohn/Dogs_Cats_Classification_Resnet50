@@ -21,6 +21,8 @@ def data_loader(path, batch_size):
                             ])
                  }
     dataset = {x: ImageFolder(os.path.join(path, x), preprocess[x]) for x in ['train', 'valid', 'test']}
-    loader = {x: DataLoader(dataset[x], batch_size=batch_size, shuffle=True) for x in ['train', 'valid', 'test']}
+    loader = {"train": DataLoader(dataset["train"], batch_size=batch_size, shuffle=True),
+              "valid": DataLoader(dataset["valid"], batch_size=batch_size, shuffle=True),
+              "test": DataLoader(dataset["test"], batch_size=1, shuffle=False)}
 
     return loader

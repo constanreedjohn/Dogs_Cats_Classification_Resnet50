@@ -1,6 +1,5 @@
 import loader
 import matplotlib.pyplot as plt
-import cv2
 import torch
 import torchvision
 import torch.nn as nn
@@ -10,6 +9,7 @@ from tqdm import tqdm
 import os
 import argparse
 import time
+from model import resnet
 
 def train(device, 
           model, 
@@ -130,18 +130,6 @@ def plot_result(train, val, num_epochs, name, save_path):
 
     plt.savefig(f"{saved_path}/Evaluation.png")
 
-def main():
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(f"Using {device}")
-    model = torchvision.models.resnet50(pretrained=True)
-    optimizer = Adam(model.parameters(), lr=0.001)
-    scheduler = ReduceLROnPlateau(optimizer, 'min')
-    model.fc = nn.Linear(2048, 2, bias=True)
-    print("Model configured: ", model.fc)
-    model.to(device)
-
-    return device, model, optimizer, scheduler
-
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default= os.getcwd()+"/dataset", help="Dataset path")
@@ -150,17 +138,37 @@ def parse_opt():
     parser.add_argument("--save_period", type=int, default=-1, help="Save every n_th epoch")
     parser.add_argument("--name", type=str, help="Name of model")
     parser.add_argument("--save_path", type=str, default= os.getcwd() + "/saved_model", help="Save model path")
-    parser.add_argument("--resume", type=str, defalut=None, help="Resume model path")
+    parser.add_argument("--resume", type=str, default=None, help="Resume model path")
+    parser.add_argument("--use_torch", action="store_true", default=None, help="Whether use torch model or not")
     args = parser.parse_args()
     
     return args
+
+def main():
+    args = parse_opt()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Using {device}")
+    # Use torchvision model
+    if args.use_torch:
+        model = torchvision.models.resnet50(pretrained=True)
+        model.fc = nn.Linear(2048, 2, bias=True)
+    elif args.use_torch is None:
+        # Use implemented model
+        model = resnet.resnet50(2)
+    optimizer = Adam(model.parameters(), lr=0.001)
+    scheduler = ReduceLROnPlateau(optimizer, 'min')
+    print("Model configured: ", model.fc)
+    model.to(device)
+
+    return device, model, optimizer, scheduler
+
 
 if __name__ == "__main__":
     args = parse_opt()
 
     if not os.path.exists(os.path.join(args.save_path, args.name)):
         os.mkdir(os.path.join(args.save_path, args.name))
-
+        
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
 
